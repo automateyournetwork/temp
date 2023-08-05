@@ -208,6 +208,68 @@ class Test_Interfaces(aetest.Testcase):
                                 ''')
         self.capture_interface_state()
 
+    @aetest.test
+    def test_interface_description_matches_intent(self):
+        self.failed_interfaces = {}
+        table = Table(title="Original Interface Description Matches Intent")
+        table.add_column("Device", style="blue")
+        table.add_column("Interface", style="magenta")
+        table.add_column("Intended Description", style="green")
+        table.add_column("Actual Description", style="red")
+        table.add_column("Passed/Failed", style="yellow")
+
+        for self.intf, value in self.parsed_interfaces.info.items():
+            actual_desc = value.get('description', None)
+            for interface, intent_value in self.device.custom.interfaces.items():
+                if self.intf == interface:
+                    self.intended_desc = intent_value['description']
+                    if actual_desc != self.intended_desc:
+                        table.add_row(self.device.alias, self.intf, self.intended_desc, actual_desc or "N/A", 'FAILED', style='red')
+                        self.failed_interfaces[self.intf] = self.intended_desc
+                        self.update_interface_description()
+                    else:
+                        table.add_row(self.device.alias, self.intf, self.intended_desc, actual_desc, 'Passed', style='green')
+
+        # display the table
+        console = Console(record=True)
+        with console.capture() as capture:
+            console.print(table)
+
+        log.info(capture.get())
+
+        # Should we pass or fail the test?
+        if self.failed_interfaces:
+            table = Table(title="Updated Interface Description Matches Intent")
+            table.add_column("Device", style="blue")
+            table.add_column("Interface", style="magenta")
+            table.add_column("Intended Description", style="green")
+            table.add_column("Actual Description", style="red")
+            table.add_column("Passed/Failed", style="yellow")            
+            for self.intf, value in self.parsed_interfaces.info.items():
+                actual_desc = value.get('description', None)
+                for interface, intent_value in self.device.custom.interfaces.items():
+                    if self.intf == interface:
+                        self.intended_desc = intent_value['description']
+                        if actual_desc != self.intended_desc:
+                            table.add_row(self.device.alias, self.intf, self.intended_desc, actual_desc or "N/A", 'FAILED', style='red')
+                            self.failed_interfaces[self.intf] = self.intended_desc
+                        else:
+                            table.add_row(self.device.alias, self.intf, self.intended_desc, actual_desc, 'Passed', style='green')
+
+            # display the table
+            console = Console(record=True)
+            with console.capture() as capture:
+                console.print(table)
+
+            log.info(capture.get())
+
+    def update_interface_description(self):
+        if self.failed_interfaces:
+            self.device.configure(f'''interface { self.intf }
+                                      description { self.intended_desc } 
+                                    ''')
+            self.capture_interface_state()
+
 class common_cleanup(aetest.CommonCleanup):
     """Common Cleanup Section"""
     @aetest.subsection

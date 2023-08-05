@@ -1,0 +1,15 @@
+---
+extends: testbed.yaml
+devices:
+  csr1000v-1:
+    custom:
+      interfaces:
+        GigabitEthernet1:
+            type: ethernet
+            description: "MANAGEMENT INTERFACE - DON'T TOUCH ME"
+        GigabitEthernet2:
+            type: ethernet
+            description: "Network Interface"
+        GigabitEthernet3:
+            type: ethernet
+            description: "Network Interface"

@@ -4,7 +4,7 @@ from genie.testbed import load
 def main(runtime):
     if not runtime.testbed:
         # If no testbed is provided 
-        testbedfile = os.path.join('testbed.yaml')
+        testbedfile = os.path.join('intent.yaml')
         testbed = load(testbedfile)
     else:
         testbed = runtime.testbed
